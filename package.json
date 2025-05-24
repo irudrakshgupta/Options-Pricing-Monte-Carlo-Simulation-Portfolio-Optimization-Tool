@@ -1,0 +1,25 @@
+{
+  "name": "option-growth-analyzer",
+  "version": "1.0.0",
+  "description": "A comprehensive web-based quantitative finance toolkit for option pricing, strategy analysis, and portfolio optimization",
+  "main": "index.html",
+  "scripts": {
+    "start": "python3 -m http.server 8000",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "options",
+    "finance",
+    "black-scholes",
+    "portfolio-optimization",
+    "monte-carlo",
+    "quant"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "chart.js": "^4.4.1",
+    "d3": "^7.8.5",
+    "tailwindcss": "^3.4.1"
+  }
+} 

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Option-Growth Analyzer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+    <nav class="bg-white dark:bg-gray-800 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <h1 class="text-xl font-bold">Option-Growth Analyzer</h1>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <button id="theme-toggle" class="p-2 rounded-lg">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Black-Scholes Calculator Section -->
+            <section class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <h2 class="text-2xl font-bold mb-4">Black-Scholes Calculator</h2>
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium">Spot Price</label>
+                            <input type="number" id="spot-price" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium">Strike Price</label>
+                            <input type="number" id="strike-price" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium">Time to Expiry (Years)</label>
+                            <input type="number" id="time-to-expiry" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium">Volatility (%)</label>
+                            <input type="number" id="volatility" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium">Risk-Free Rate (%)</label>
+                            <input type="number" id="risk-free-rate" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium">Option Type</label>
+                            <select id="option-type" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700">
+                                <option value="call">Call</option>
+                                <option value="put">Put</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button id="calculate" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">Calculate</button>
+                </div>
+                <div class="mt-6">
+                    <h3 class="text-lg font-medium mb-2">Results</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-gray-50 dark:bg-gray-700 p-3 rounded">
+                            <span class="block text-sm font-medium">Option Price</span>
+                            <span id="option-price" class="text-lg">-</span>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-700 p-3 rounded">
+                            <span class="block text-sm font-medium">Delta</span>
+                            <span id="delta" class="text-lg">-</span>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-700 p-3 rounded">
+                            <span class="block text-sm font-medium">Gamma</span>
+                            <span id="gamma" class="text-lg">-</span>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-700 p-3 rounded">
+                            <span class="block text-sm font-medium">Vega</span>
+                            <span id="vega" class="text-lg">-</span>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-700 p-3 rounded">
+                            <span class="block text-sm font-medium">Theta</span>
+                            <span id="theta" class="text-lg">-</span>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-700 p-3 rounded">
+                            <span class="block text-sm font-medium">Rho</span>
+                            <span id="rho" class="text-lg">-</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Strategy Presets Section -->
+            <section class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <h2 class="text-2xl font-bold mb-4">Strategy Presets</h2>
+                <div class="space-y-4">
+                    <select id="strategy-select" class="block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700">
+                        <option value="covered-call">Covered Call</option>
+                        <option value="cash-secured-put">Cash-Secured Put</option>
+                        <option value="long-leaps">Long LEAPS</option>
+                        <option value="strangle">Strangle</option>
+                    </select>
+                    <div id="strategy-description" class="bg-gray-50 dark:bg-gray-700 p-4 rounded">
+                        Select a strategy to view details
+                    </div>
+                    <div>
+                        <canvas id="payoff-diagram" class="w-full"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Compound Interest Calculator Section -->
+            <section class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <h2 class="text-2xl font-bold mb-4">Compound Interest Calculator</h2>
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium">Initial Capital</label>
+                            <input type="number" id="initial-capital" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium">Monthly Return (%)</label>
+                            <input type="number" id="monthly-return" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium">Duration (Years)</label>
+                            <input type="number" id="duration" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium">Reinvestment Frequency</label>
+                            <select id="reinvestment-frequency" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700">
+                                <option value="monthly">Monthly</option>
+                                <option value="quarterly">Quarterly</option>
+                                <option value="annually">Annually</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button id="calculate-growth" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">Calculate Growth</button>
+                    <div>
+                        <canvas id="growth-chart" class="w-full"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Portfolio Optimizer Section -->
+            <section class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <h2 class="text-2xl font-bold mb-4">Portfolio Optimizer</h2>
+                <div class="space-y-4">
+                    <div id="strategy-inputs" class="space-y-2">
+                        <!-- Dynamic strategy inputs will be added here -->
+                    </div>
+                    <button id="add-strategy" class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700">Add Strategy</button>
+                    <button id="optimize-portfolio" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">Optimize Portfolio</button>
+                    <div>
+                        <canvas id="efficient-frontier" class="w-full"></canvas>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="lib/black-scholes.js"></script>
+    <script src="lib/monte-carlo.js"></script>
+    <script src="lib/portfolio-optimizer.js"></script>
+    <script src="assets/js/main.js"></script>
+</body>
+</html> 
